@@ -1,7 +1,7 @@
 <?php
 
 /*
-Plugin Name: Tag Director
+Plugin Name: Tag Browser
 Plugin URI: http://crowdfavorite.com/wordpress/
 Description: Psuedo-hierarchical tag browsing. Inspired by Johnvey's excellent Del.icio.us Direc.tor.
 Author: Crowd Favorite
@@ -9,26 +9,26 @@ Author URI: http://crowdfavorite.com
 Version: 1.0
 */
 
-load_plugin_textdomain('cf_tag_director');
+load_plugin_textdomain('cf_tag_browser');
 
-function cftd_director() {
-	echo cftd_get_director();
+function cftd_browser() {
+	echo cftd_get_browser();
 }
 
-function cftd_get_director() {
+function cftd_get_browser() {
 	$tags = get_tags();
 	if (!count($tags)) {
-		return '<div class="cftd_empty">'.__('No tags - add some!', 'cf_tag_director').'</div>';
+		return '<div class="cftd_empty">'.__('No tags - add some!', 'cf_tag_browser').'</div>';
 	}
 	$categories = get_categories('hide_empty=0');
-	$cat_options = '<option value="" selected="selected">'.__('All', 'cf_tag_director').'</option>'.PHP_EOL;
+	$cat_options = '<option value="" selected="selected">'.__('All', 'cf_tag_browser').'</option>'.PHP_EOL;
 	foreach ($categories as $category) {
 		$cat_options .= '<option value="'.$category->term_id.'">'.htmlspecialchars($category->name).'</option>'.PHP_EOL;
 	}
 	return '
-<h3>'.__('Tags', 'cf_tag_director').'</h3>
+<h3>'.__('Tags', 'cf_tag_browser').'</h3>
 <div class="cftd_cat">
-	<label for="cftd_category">'.__('Limit to Category:', 'cf_tag_director').'</label>
+	<label for="cftd_category">'.__('Limit to Category:', 'cf_tag_browser').'</label>
 	<select id="cftd_category" name="cftd_category">
 	'.$cat_options.'
 	</select>
@@ -39,11 +39,11 @@ function cftd_get_director() {
 	</div>
 	<div class="clear"></div>
 </div>
-<h3>'.__('Posts', 'cf_tag_director').'</h3>
+<h3>'.__('Posts', 'cf_tag_browser').'</h3>
 <div class="cftd_posts"></div>
 	';
 }
-add_shortcode('tag-director', 'cftd_get_director');
+add_shortcode('tag-browser', 'cftd_get_browser');
 
 function cftd_related_tags($tags = array(), $cat = null) {
 	global $wpdb;
@@ -103,7 +103,7 @@ function cftd_tags_html($tags) {
 		}
 	}
 	else {
-		$output .= '<li class="none">'.__('No tags found.', 'cf_tag_director').'</li>';
+		$output .= '<li class="none">'.__('No tags found.', 'cf_tag_browser').'</li>';
 	}
 	$output .= '</ul>';
 	return $output;
@@ -121,7 +121,7 @@ function cftd_posts_html($posts) {
 		}
 	}
 	else {
-		$output .= '<li class="none">'.__('No posts found.', 'cf_tag_director').'</li>';
+		$output .= '<li class="none">'.__('No posts found.', 'cf_tag_browser').'</li>';
 	}
 	$output .= '</ul>';
 	return $output;
@@ -174,7 +174,7 @@ function cftd_request_handler() {
 cftd = {}
 
 cftd.tpl_loading = function() {
-	return '<div class="loading"><span><?php _e('Loading...', 'cf_tag_director'); ?></span></div>';
+	return '<div class="loading"><span><?php _e('Loading...', 'cf_tag_browser'); ?></span></div>';
 }
 
 cftd.direct = function(this_col, next_col) {
@@ -413,7 +413,7 @@ function cftd_the_title($title) {
 
 function cftd_the_content($content) {
 	remove_filter('the_content', 'cftd_the_content');
-	return cftd_get_director();
+	return cftd_get_browser();
 }
 
 function cftd_list_pages($output) {
@@ -423,7 +423,7 @@ function cftd_list_pages($output) {
 	else {
 		$url = trailingslashit(get_bloginfo('url')).trailingslashit(cftd_setting('cftd_slug'));
 	}
-	$output .= '<li><a href="'.$url.'">'.__('Tag Browser', 'cf_tag_director').'</a></li>';
+	$output .= '<li><a href="'.$url.'">'.__('Tag Browser', 'cf_tag_browser').'</a></li>';
 	if (strpos($output, '<li class="pagenav">') !== false) {
 		$output = str_replace('</ul></li>', '', $output).'</ul></li>';
 	}
@@ -469,8 +469,8 @@ function cftd_setting($option) {
 function cftd_admin_menu() {
 	if (current_user_can('manage_options')) {
 		add_options_page(
-			__('Tag Director Settings', '')
-			, __('Tag Director', '')
+			__('Tag Browser Settings', '')
+			, __('Tag Browser', '')
 			, 10
 			, basename(__FILE__)
 			, 'cftd_settings_form'
@@ -522,7 +522,7 @@ function cftd_settings_form() {
 	global $cftd_settings;
 	print('
 <div class="wrap">
-	<h2>'.__('Tag Director Settings', '').'</h2>
+	<h2>'.__('Tag Browser Settings', '').'</h2>
 	<form id="cftd_settings_form" name="cftd_settings_form" action="'.get_bloginfo('wpurl').'/wp-admin/options-general.php" method="post">
 		<input type="hidden" name="cf_action" value="cftd_update_settings" />
 		<fieldset class="options form-table">
@@ -536,13 +536,13 @@ function cftd_settings_form() {
 			<input type="submit" name="submit" value="'.__('Save Settings', '').'" />
 		</p>
 	</form>
-	<h2>'.__('Adding Manually', 'cf_tag_director').'</h2>
-	<p>'.__("If you don't auto-create a page, you can add the Tag Browser to your site using the following methods.", 'cf_tag_director').'</p>
-	<h3>'.__('Template Tag', 'cf_tag_director').'</h3>
-	<p>'.__('Add this to your template page:', 'cf_tag_director').'</p>
-	<p><code>&lt;?php if (function_exists("cftd_director")) { cftd_director(); } ?&gt;</code></p>
-	<h3>'.__('Shortcode', 'cf_tag_director').'</h3>
-	<p>'.__('Add this to a post or page: [tag-director]', 'cf_tag_director').'</p>
+	<h2>'.__('Adding Manually', 'cf_tag_browser').'</h2>
+	<p>'.__("If you don't auto-create a page, you can add the Tag Browser to your site using the following methods.", 'cf_tag_browser').'</p>
+	<h3>'.__('Template Tag', 'cf_tag_browser').'</h3>
+	<p>'.__('Add this to your template page:', 'cf_tag_browser').'</p>
+	<p><code>&lt;?php if (function_exists("cftd_browser")) { cftd_browser(); } ?&gt;</code></p>
+	<h3>'.__('Shortcode', 'cf_tag_browser').'</h3>
+	<p>'.__('Add this to a post or page: [tag-browser]', 'cf_tag_browser').'</p>
 </div>
 	');
 }
