@@ -483,7 +483,7 @@ function cftb_admin_menu() {
 	if (current_user_can('manage_options')) {
 		add_options_page(
 			__('Tag Browser Settings', '')
-			, __('Tag Browser', '')
+			, __('CF Tag Browser', '')
 			, 10
 			, basename(__FILE__)
 			, 'cftb_settings_form'
