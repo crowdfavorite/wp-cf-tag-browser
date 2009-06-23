@@ -38,6 +38,8 @@ function cftb_get_browser() {
 	</div>
 	<div class="clear"></div>
 </div>
+<h3>'.__('Custom Tag Feed', 'cf_tag_browser').'</h3>
+<div class="cftb_tag_feed"></div>
 <h3>'.__('Posts', 'cf_tag_browser').'</h3>
 <div class="cftb_posts"></div>
 	';
@@ -173,9 +175,19 @@ function cftb_request_handler() {
 					$posts = array();
 				}
 				$posts_html = cftb_posts_html($posts);
+				
+				/* Get the custom tag feed now */
+				if (is_array($tags) && !empty($tags)) {
+					$tag_feed_items = implode('+', $tags);
+					$tag_feed = trailingslashit(get_bloginfo('url')).'tag/'.$tag_feed_items.'/feed';
+				}
+				else {
+					$tag_feed = '';
+				}
 				$data = array(
 					'tags' => $related_html
 					, 'posts' => $posts_html
+					, 'tag_feed' => $tag_feed
 				);
 				cf_json_out($data);
 				die();
@@ -220,6 +232,7 @@ cftd.direct = function(this_col, next_col) {
 			var result = eval('(' + response + ')');
 			jQuery('.cftb_tags [rel="column_' + next_col + '"]').html(result.tags);
 			jQuery('.cftb_posts').html(result.posts);
+			jQuery('.cftb_tag_feed').html('<a href="'+result.tag_feed+'">'+result.tag_feed+'</a>');
 			cftd.handlers();
 		}
 	);
