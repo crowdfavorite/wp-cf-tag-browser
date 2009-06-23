@@ -179,10 +179,11 @@ function cftb_request_handler() {
 				/* Get the custom tag feed now */
 				if (is_array($tags) && !empty($tags)) {
 					$tag_feed_items = implode('+', $tags);
-					$tag_feed = trailingslashit(get_bloginfo('url')).'tag/'.$tag_feed_items.'/feed';
+					$tag_feed_url = attribute_escape( trailingslashit(get_bloginfo('url')).'tag/'.$tag_feed_items.'/feed/');
+					$tag_feed = '<a href="'.$tag_feed_url.'/feed'.'">'.$tag_feed_url.'</a>';
 				}
 				else {
-					$tag_feed = '';
+					$tag_feed = 'Please select a tag from above, to get the custom feed url.';
 				}
 				$data = array(
 					'tags' => $related_html
@@ -232,7 +233,7 @@ cftd.direct = function(this_col, next_col) {
 			var result = eval('(' + response + ')');
 			jQuery('.cftb_tags [rel="column_' + next_col + '"]').html(result.tags);
 			jQuery('.cftb_posts').html(result.posts);
-			jQuery('.cftb_tag_feed').html('<a href="'+result.tag_feed+'">'+result.tag_feed+'</a>');
+			jQuery('.cftb_tag_feed').html(result.tag_feed);
 			cftd.handlers();
 		}
 	);
