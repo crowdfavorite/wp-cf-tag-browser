@@ -179,7 +179,7 @@ function cftb_request_handler() {
 				if (is_array($tags) && !empty($tags)) {
 					$tag_feed_items = implode('+', $tags);
 					$tag_feed_url = attribute_escape( trailingslashit(get_bloginfo('url')).'tag/'.$tag_feed_items.'/feed/');
-					$tag_feed = '<a href="'.$tag_feed_url.'/feed'.'">'.$tag_feed_url.'</a>';
+					$tag_feed = '<a href="'.$tag_feed_url.'"><img style="border: none;" src="'.attribute_escape( site_url('wp-includes/images/rss.png') ).'" alt="RSS Link" /></a>&nbsp;&nbsp;<a href="'.$tag_feed_url.'">'.$tag_feed_url.'</a>';
 				}
 				else {
 					$tag_feed = 'Please select a tag from above, to get the custom feed url.';
