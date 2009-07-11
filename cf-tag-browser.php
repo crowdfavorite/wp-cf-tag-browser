@@ -38,8 +38,6 @@ function cftb_get_browser() {
 	</div>
 	<div class="clear"></div>
 </div>
-<h3>'.__('Custom Tag Feed', 'cf_tag_browser').'</h3>
-<p class="cftb_tag_feed"></p>
 <h3>'.__('Posts', 'cf_tag_browser').'</h3>
 <div class="cftb_posts"></div>
 	';
@@ -175,19 +173,9 @@ function cftb_request_handler() {
 				}
 				$posts_html = cftb_posts_html($posts);
 				
-				/* Get the custom tag feed now */
-				if (is_array($tags) && !empty($tags)) {
-					$tag_feed_items = implode('+', $tags);
-					$tag_feed_url = attribute_escape( trailingslashit(get_bloginfo('url')).'tag/'.$tag_feed_items.'/feed/');
-					$tag_feed = '<a href="'.$tag_feed_url.'/feed'.'">'.$tag_feed_url.'</a>';
-				}
-				else {
-					$tag_feed = 'Please select a tag from above, to get the custom feed url.';
-				}
 				$data = array(
 					'tags' => $related_html
 					, 'posts' => $posts_html
-					, 'tag_feed' => $tag_feed
 				);
 				cf_json_out($data);
 				die();
@@ -232,7 +220,6 @@ cftd.direct = function(this_col, next_col) {
 			var result = eval('(' + response + ')');
 			jQuery('.cftb_tags [rel="column_' + next_col + '"]').html(result.tags);
 			jQuery('.cftb_posts').html(result.posts);
-			jQuery('.cftb_tag_feed').html(result.tag_feed);
 			cftd.handlers();
 		}
 	);
