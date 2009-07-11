@@ -38,6 +38,8 @@ function cftb_get_browser() {
 	</div>
 	<div class="clear"></div>
 </div>
+<h3>'.__('Custom Tag Feed', 'cf_tag_browser').'</h3>
+<p class="cftb_tag_feed"></p>
 <h3>'.__('Posts', 'cf_tag_browser').'</h3>
 <div class="cftb_posts"></div>
 	';
@@ -127,12 +129,11 @@ function cftb_posts_html($posts) {
 }
 
 wp_enqueue_script('jquery');
-wp_enqueue_script('cftb_js', trailingslashit(get_bloginfo('url')).'?cf_action=cftb_js', 'jquery');
 
-function cftb_wp_head() {
-	echo '<link rel="stylesheet" type="text/css" href="'.trailingslashit(get_bloginfo('url')).'?cf_action=cftb_css" />';
+if (!is_admin()) {
+	wp_enqueue_script('cftb_js', trailingslashit(get_bloginfo('url')).'?cf_action=cftb_js', 'jquery');
+	wp_enqueue_style('cftb_css',trailingslashit(get_bloginfo('url')).'?cf_action=cftb_css');
 }
-add_action('wp_head', 'cftb_wp_head');
 
 function cftb_admin_head() {
 	echo '<link rel="stylesheet" type="text/css" href="'.trailingslashit(get_bloginfo('url')).'?cf_action=cftb_admin_css" />';
@@ -173,9 +174,20 @@ function cftb_request_handler() {
 					$posts = array();
 				}
 				$posts_html = cftb_posts_html($posts);
+				
+				/* Get the custom tag feed now */
+				if (is_array($tags) && !empty($tags)) {
+					$tag_feed_items = implode('+', $tags);
+					$tag_feed_url = attribute_escape( trailingslashit(get_bloginfo('url')).'tag/'.$tag_feed_items.'/feed/');
+					$tag_feed = '<a href="'.$tag_feed_url.'/feed'.'">'.$tag_feed_url.'</a>';
+				}
+				else {
+					$tag_feed = 'Please select a tag from above, to get the custom feed url.';
+				}
 				$data = array(
 					'tags' => $related_html
 					, 'posts' => $posts_html
+					, 'tag_feed' => $tag_feed
 				);
 				cf_json_out($data);
 				die();
@@ -220,6 +232,7 @@ cftd.direct = function(this_col, next_col) {
 			var result = eval('(' + response + ')');
 			jQuery('.cftb_tags [rel="column_' + next_col + '"]').html(result.tags);
 			jQuery('.cftb_posts').html(result.posts);
+			jQuery('.cftb_tag_feed').html(result.tag_feed);
 			cftd.handlers();
 		}
 	);
@@ -258,26 +271,32 @@ jQuery(function() {
 }
 .cftb_tags .loading, .cftb_posts .loading {
 	color: #999;
+	padding: 5px;
 }
 .cftb_cat {
 	background: #eee;
 	border: 1px solid #ccc;
-	border-width: 1px 0;
-	padding: 5px;
+	border-width: 1px;
+	padding: 5px 12px;
+	text-align: right;
 }
 .cftb_tags {
 	height: <?php echo $tags_height; ?>px;
 	overflow: auto;
 	position: relative;
+	border-right: 1px solid #ccc;
+	border-bottom: 1px solid #ccc;
+	border-left: 1px solid #ccc;
+	margin-bottom: 1em;
 }
 .cftb_tags .column {
-	border-left: 1px solid #ccc;
+	border-right: 1px solid #ccc;
 	height: <?php echo $tags_height; ?>px;
 	left: 0;
 	overflow: auto;
 	position: absolute;
 	top: 0;
-	width: <?php echo $tags_width; ?>px;
+	width: <?php echo $tags_width - 1; ?>px;
 }
 .cftb_tags .column ul, .cftb_tags .column ul li {
 	list-style: none;
@@ -296,11 +315,10 @@ jQuery(function() {
 }
 .cftb_tags .column ul li a {
 	display: block;
-	padding: 2px 5px;
+	padding: 4px 5px 0px;
 }
 .cftb_tags .column ul li a.selected {
 	background: #eee;
-	font-weight: bold;
 }
 .cftb_posts ul {
 	list-style: none;
@@ -470,7 +488,7 @@ function cftb_admin_menu() {
 	if (current_user_can('manage_options')) {
 		add_options_page(
 			__('Tag Browser Settings', '')
-			, __('Tag Browser', '')
+			, __('CF Tag Browser', '')
 			, 10
 			, basename(__FILE__)
 			, 'cftb_settings_form'
