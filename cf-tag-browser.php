@@ -5,7 +5,7 @@ Plugin URI: http://crowdfavorite.com/wordpress/
 Description: Psuedo-hierarchical tag browsing. Inspired by Johnvey's excellent Del.icio.us Direc.tor.
 Author: Crowd Favorite
 Author URI: http://crowdfavorite.com
-Version: 1.0.1
+Version: 1.0.1 BROKEN TAG DO NOT USE
 */
 
 load_plugin_textdomain('cf_tag_browser');
