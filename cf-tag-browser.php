@@ -46,6 +46,17 @@ add_shortcode('tag-browser', 'cftb_get_browser');
 
 function cftb_related_tags($tags = array(), $cat = null) {
 	global $wpdb;
+	
+	// Escape the passed in tags for safety, if we have tags
+	$escaped = array();
+	if (is_array($tags) && !empty($tags)) {
+		foreach ($tags as $tag) {
+			$escaped[] = $wpdb->escape($tag);
+		}
+		$tags = $escaped;
+	}
+	
+	
 	$related = array();
 	$post_ids = cftb_post_ids_by_tags($tags, $cat);
 	if (count($post_ids)) {
@@ -58,8 +69,8 @@ function cftb_related_tags($tags = array(), $cat = null) {
 			JOIN $wpdb->term_relationships tr
 			ON tr.term_taxonomy_id = tt.term_taxonomy_id
 			WHERE tt.taxonomy = 'post_tag'
-			AND t.slug NOT IN ('".$wpdb->escape(implode("','", $tags))."')
-			AND tr.object_id IN (".$wpdb->escape(implode(',', $post_ids)).")
+			AND t.slug NOT IN ('".implode("','", $tags)."')
+			AND tr.object_id IN (".implode(',', $post_ids).")
 			GROUP BY t.term_id
 			ORDER BY t.name
 		");
