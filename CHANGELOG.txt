@@ -1,0 +1,9 @@
+# CF Tag Browser Changelog
+
+## 1.0.1
+
+- Security updates
+
+##1.0.2
+
+- Fixed bug that was repeating selected tag in the right pane.
