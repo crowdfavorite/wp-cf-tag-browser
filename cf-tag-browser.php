@@ -414,6 +414,7 @@ if (cftb_setting('cftb_create_page') == 'yes') {
 			$wp_query->post_count = 1;
 			$wp_query->current_post = -1;
 			add_filter('the_title', 'cftb_the_title');
+			add_filter('wp_title', 'cftb_wp_title', 10, 3);
 			add_filter('the_content', 'cftb_the_content');
 			$template = get_page_template();
 			include($template);
@@ -426,6 +427,17 @@ if (cftb_setting('cftb_create_page') == 'yes') {
 	function cftb_the_title($title) {
 		remove_filter('the_title', 'cftb_the_title');
 		return cftb_setting('cftb_page_title');
+	}
+	
+	function cftb_wp_title($title, $sep, $seplocation) {
+		$new_title = cftb_setting('cftb_page_title');
+		if ($seplocation == 'right') {
+			$title = $new_title." $sep ";
+		}
+		else {
+			$title = " $sep ".$new_title;
+		}
+		return $title;
 	}
 
 	function cftb_the_content($content) {
