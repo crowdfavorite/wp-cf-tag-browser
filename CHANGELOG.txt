@@ -1,9 +1,15 @@
 # CF Tag Browser Changelog
 
-## 1.0.1
+##1.0.3
 
-- Security updates
+- Fixed bugs that occurred on upgrade to WordPress 3.0
+- Tested successfully on WordPress 3.0
 
 ##1.0.2
 
 - Fixed bug that was repeating selected tag in the right pane.
+
+## 1.0.1
+
+- Security updates
+
