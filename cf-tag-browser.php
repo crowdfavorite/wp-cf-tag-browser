@@ -243,9 +243,8 @@ function cftb_request_handler() {
 }
 .cftb_tags .column ul, .cftb_tags .column ul li {
 	list-style: none;
-	list-style-image: url();
+	display: block;
 	margin: 0;
-	overflow: hidden;
 	padding: 0;
 	text-indent: 0;
 }
