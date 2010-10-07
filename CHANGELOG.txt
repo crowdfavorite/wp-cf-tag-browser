@@ -1,11 +1,17 @@
 # CF Tag Browser Changelog
 
-##1.0.3
+## 1.1
+
+- Added ability for tag chain to be "bookmarkable"
+- Addition of tag counts next to the tags
+- Abstracted JavaScript into its own file.  Utilized the $wp_scripts->localize() method for dynamic info.  Commenting the JS up the wazoo
+
+## 1.0.3
 
 - Fixed bugs that occurred on upgrade to WordPress 3.0
 - Tested successfully on WordPress 3.0
 
-##1.0.2
+## 1.0.2
 
 - Fixed bug that was repeating selected tag in the right pane.
 

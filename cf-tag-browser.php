@@ -5,7 +5,7 @@ Plugin URI: http://crowdfavorite.com/wordpress/
 Description: Psuedo-hierarchical tag browsing. Inspired by Johnvey's excellent Del.icio.us Direc.tor.
 Author: Crowd Favorite
 Author URI: http://crowdfavorite.com
-Version: 1.0.3
+Version: 1.1
 */
 
 load_plugin_textdomain('cf_tag_browser');
@@ -120,7 +120,7 @@ function cftb_tags_html($tags) {
 }
 
 function cftb_tag_html($tag) {
-	return '<li><a href="'.get_tag_link($tag->term_id).'" rel="tag-'.$tag->slug.'">'.htmlspecialchars($tag->name).'</a></li>';
+	return '<li><a href="'.get_tag_link($tag->term_id).'" rel="tag-'.$tag->slug.'">'.htmlspecialchars($tag->name).' ('.$tag->count.')</a></li>';
 }
 
 function cftb_posts_html($posts) {
@@ -141,6 +141,12 @@ wp_enqueue_script('jquery');
 
 if (!is_admin()) {
 	wp_enqueue_script('cftb_js', trailingslashit(get_bloginfo('url')).'?cf_action=cftb_js', 'jquery');
+	global $wp_scripts;
+	$wp_scripts->localize('cftb_js', 'cftb', array(
+		'endpoint' => trailingslashit(get_bloginfo('url')),
+		'txtLoading' => __('Loading...', 'cf_tag_browser'),
+	));
+	
 	wp_enqueue_style('cftb_css',trailingslashit(get_bloginfo('url')).'?cf_action=cftb_css');
 }
 
@@ -194,68 +200,7 @@ function cftb_request_handler() {
 
 			case 'cftb_js':
 				header('Content-type: text/javascript');
-?>
-cftd = {}
-
-cftd.tpl_loading = function() {
-	return '<div class="loading"><span><?php _e('Loading...', 'cf_tag_browser'); ?></span></div>';
-}
-
-cftd.direct = function(this_col, next_col) {
-	for (var i = next_col; i < 999; i++) {
-		var test = jQuery('.cftb_tags [rel="column_' + i + '"]');
-		test.size() ? test.remove() : i = 999;
-	}
-	tags = [];
-	jQuery('.cftb_tags li a.selected').each(function() {
-		tags[tags.length] = jQuery(this).attr('rel').replace('tag-', '');
-	});
-	loading = '<div class="column" rel="column_' + next_col + '">' + cftd.tpl_loading() + '</div>';
-	this_col_elem = jQuery('.cftb_tags [rel="column_' + this_col + '"]');
-	if (this_col_elem.size()) {
-		this_col_elem.after(loading);
-	}
-	else {
-		jQuery('.cftb_tags').html(loading + '<div class="clear"></div>');
-	}
-	jQuery('.cftb_tags [rel="column_' + next_col + '"]').css('left', (this_col * 150) + 'px');
-	jQuery('.cftb_posts').html(cftd.tpl_loading());
-	jQuery.get(
-		'<?php echo trailingslashit(get_bloginfo('url')); ?>'
-		, {
-			cf_action: 'cftb_get_related'
-			, cftb_tags: tags.join(',')
-			, cftb_cat: jQuery('#cftb_category').val()
-		}
-		, function(response) {
-			var result = eval('(' + response + ')');
-			jQuery('.cftb_tags [rel="column_' + next_col + '"]').html(result.tags);
-			jQuery('.cftb_posts').html(result.posts);
-			cftd.handlers();
-		}
-	);
-}
-
-cftd.handlers = function() {
-	jQuery('#cftb_category').unbind().change(function() {
-		cftd.direct(0, 1);
-	});
-	jQuery('.cftb_tags li a').unbind().click(function() {
-		var parent_div = jQuery(this).parent().parent().parent();
-		parent_div.find('a.selected').removeClass('selected');
-		jQuery(this).addClass('selected');
-		this_col = parseInt(parent_div.attr('rel').replace('column_', ''));
-		next_col = this_col + 1;
-		cftd.direct(this_col, next_col);
-		return false;
-	});
-}
-
-jQuery(function() {
-	cftd.handlers();
-});
-
-<?php
+				include('script.js');
 				die();
 				break;
 			case 'cftb_css':
