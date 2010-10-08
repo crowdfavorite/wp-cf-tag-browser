@@ -58,10 +58,16 @@ function cftb_related_tags($tags = array(), $cat = null) {
 	
 	
 	$related = array();
+	
+	// If we are passed a cat, make sure it's valid
+	if (!is_null($cat) && !term_exists($cat, 'category')) {
+		return $related;
+	}
+	
 	$post_ids = cftb_post_ids_by_tags($tags, $cat);
 	if (count($post_ids)) {
 		// category filtering already done in cftb_post_ids_by_tags()
-		$related = $wpdb->get_results("
+		$sql = "
 			SELECT t.*
 			FROM $wpdb->terms t
 			JOIN $wpdb->term_taxonomy tt
@@ -73,7 +79,8 @@ function cftb_related_tags($tags = array(), $cat = null) {
 			AND tr.object_id IN (".implode(',', $post_ids).")
 			GROUP BY t.term_id
 			ORDER BY t.name
-		");
+		";
+		$related = $wpdb->get_results($sql);
 	}
 	return $related;
 }
@@ -143,10 +150,9 @@ wp_enqueue_script('jquery');
 if (!is_admin()) {
 	wp_enqueue_script('cftb_js', trailingslashit(get_bloginfo('url')).'?cf_action=cftb_js', 'jquery');
 	global $wp_scripts;
-	$wp_scripts->localize('cftb_js', 'cftb', array(
+	$wp_scripts->localize('cftb_js', 'cftbLocalized', array(
 		'endpoint' => trailingslashit(get_bloginfo('url')),
 		'txtLoading' => __('Loading...', 'cf_tag_browser'),
-		'txtNoPosts' => __('No posts found.', 'cf_tag_browser'),
 	));
 	
 	wp_enqueue_style('cftb_css',trailingslashit(get_bloginfo('url')).'?cf_action=cftb_css');
@@ -193,8 +199,9 @@ function cftb_request_handler() {
 				$posts_html = cftb_posts_html($posts);
 				
 				$data = array(
-					'tags' => $related_html
-					, 'posts' => $posts_html
+					'tags' => $related_html,
+					'posts' => $posts_html,
+					'tag_count' => count($related),
 				);
 				cf_json_out($data);
 				die();

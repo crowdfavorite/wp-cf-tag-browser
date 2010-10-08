@@ -1,15 +1,15 @@
 /**
  * Tag Browser Object
  */
-cftd = {};
-cftd.curTags = [];
-cftd.doingCatFilter = false;
+cftb = {};
+cftb.curTags = [];
+cftb.doingCatFilter = false;
 
 /**
  * Return the HTML for the loading div
  */
-cftd.tpl_loading = function() {
-	return '<div class="loading"><span>' + cftb.txtLoading + '</span></div>';
+cftb.tpl_loading = function() {
+	return '<div class="loading"><span>' + cftbLocalized.txtLoading + '</span></div>';
 };
 
 
@@ -19,7 +19,7 @@ cftd.tpl_loading = function() {
  * @param int this_col The current column
  * @param int next_col The next column to build
  */
-cftd.direct = function(this_col, next_col) {
+cftb.direct = function(this_col, next_col) {
 
 	// Remove all columns after (and inclusive of) next_col
 	for (var i = next_col; i < 999; i++) {
@@ -34,7 +34,7 @@ cftd.direct = function(this_col, next_col) {
 	});
 	
 	// Get stuff together for, and put, "loading" text in the next tag column
-	loading = '<div class="column" rel="column_' + next_col + '">' + cftd.tpl_loading() + '</div>';
+	loading = '<div class="column" rel="column_' + next_col + '">' + cftb.tpl_loading() + '</div>';
 	this_col_elem = jQuery('.cftb_tags [rel="column_' + this_col + '"]');
 	if (this_col_elem.size()) {
 		this_col_elem.after(loading);
@@ -47,11 +47,11 @@ cftd.direct = function(this_col, next_col) {
 	jQuery('.cftb_tags [rel="column_' + next_col + '"]').css('left', (this_col * 150) + 'px');
 	
 	// say we're loading in the posts place
-	jQuery('.cftb_posts').html(cftd.tpl_loading());
+	jQuery('.cftb_posts').html(cftb.tpl_loading());
 	
 	// Make the actual request
 	jQuery.get(
-		cftb.endpoint,
+		cftbLocalized.endpoint,
 		{
 			cf_action: 'cftb_get_related',
 			cftb_tags: selectedTags.join(','),
@@ -66,43 +66,43 @@ cftd.direct = function(this_col, next_col) {
 			jQuery('.cftb_posts').html(result.posts);
 			
 			// Attach our click/change handlers again
-			cftd.handlers();
-			
+			cftb.handlers();
+
 			// If we're doing our category filter and we don't have posts
-			if (cftd.doingCatFilter && !cftd.havePosts(result.posts)) {
+			if (cftb.doingCatFilter && !result.tag_count) {
 				// Set our category to All
 				jQuery('#cftb_category').val('');
 				
 				// Turn off our cat filter
-				cftd.doingCatFilter = false;
+				cftb.doingCatFilter = false;
 			}
 			
 			// Set the hash value to our tags
-			cftd.setHash(selectedTags, jQuery('#cftb_category').val());
+			cftb.setHash(selectedTags, jQuery('#cftb_category').val());
 			
 			// Check if have tags, or are doing the initial category filter
-			if (cftd.havePosts(result.posts) && (cftd.curTags || cftd.doingCatFilter)) {
+			if (result.tag_count && (cftb.curTags || cftb.doingCatFilter)) {
 				/* We don't want to shift anything off the array if we're
 				doing the category filter, we'll come back around and get 
 				the curTags. */
-				if (cftd.doingCatFilter) {
-					cftd.doingCatFilter = false;
+				if (cftb.doingCatFilter) {
+					cftb.doingCatFilter = false;
 				}
 				else {
-					cftd.curTags.shift();
+					cftb.curTags.shift();
 				}
 
 				// If we have more tags to do then call this function again.
-				if (cftd.curTags.length > 0) {
+				if (cftb.curTags.length > 0) {
 					// increment our vars
 					++this_col;
 					++next_col;
 					
 					// Mark the next tag as selected
-					cftd.selectTag(this_col, cftd.curTags[0]);
+					cftb.selectTag(this_col, cftb.curTags[0]);
 					
 					// Make our call again
-					cftd.direct(this_col, next_col);
+					cftb.direct(this_col, next_col);
 				}
 			}
 		},
@@ -112,19 +112,11 @@ cftd.direct = function(this_col, next_col) {
 
 
 /**
- * Sees if we have posts in our AJAX response.
- */
-cftd.havePosts = function(str) {
-	return str.indexOf(cftb.txtNoPosts) == '-1';
-};
-
-
-/**
  * Hooks our change and click events to the tags and category dropdown
  */
-cftd.handlers = function() {
+cftb.handlers = function() {
 	jQuery('#cftb_category').unbind().change(function() {
-		cftd.direct(0, 1);
+		cftb.direct(0, 1);
 	});
 	
 	// Click Handlers for the links
@@ -143,11 +135,11 @@ cftd.handlers = function() {
 		next_col = this_col + 1;
 		
 		// Set our tags
-		cftd.curTags = [];
-		cftd.curTags.push(jQuery(this).attr('rel').replace('tag-', ''));
+		cftb.curTags = [];
+		cftb.curTags.push(jQuery(this).attr('rel').replace('tag-', ''));
 		
 		// Make our request
-		cftd.direct(this_col, next_col);
+		cftb.direct(this_col, next_col);
 		
 		// Stop default link behavior
 		return false;
@@ -160,31 +152,37 @@ cftd.handlers = function() {
  * to start the chain of events to parse that into the tag 
  * browsing table.
  */
-cftd.parseHash = function() {
+cftb.parseHash = function() {
 	// Utilize our hash if it's provided
-	var hash = cftd.getHash();
+	var hash = cftb.getHash();
 	if (hash.length > 0) {
 		// Split our hash into tags and cat ID
 		var pieces = hash.split('|');
 		
 		// Get our tags
-		cftd.curTags = pieces[0].length ? pieces[0].split(',') : [];
+		cftb.curTags = pieces[0].length ? pieces[0].split(',') : [];
 		
-		// Select our first tag
-		cftd.selectTag(1, cftd.curTags[0]);
-
 		// Get our category, and set our select box to it.
 		var catID = pieces[1] || '';
 		
 		// If we have a category that we're filtering on, we have to do that first
 		if (catID) {
-			jQuery('#cftb_category').val(catID);
-			cftd.doingCatFilter = true;
-			cftd.direct(0, 1);
+			// Try setting our category value.  It's null if jQuery can't set it.
+			if (jQuery('#cftb_category').val(catID).val()) {
+				cftb.doingCatFilter = true;
+				cftb.direct(0, 1);
+			}
+			else {
+				// We have a non-existant category, set our category value to ''
+				jQuery('#cftb_category').val('');
+			}
 		}
 		else {
+			// Select our first tag
+			cftb.selectTag(1, cftb.curTags[0]);
+
 			// otherwise do the request
-			cftd.direct(1, 2);
+			cftb.direct(1, 2);
 		}
 	}
 };
@@ -193,7 +191,7 @@ cftd.parseHash = function() {
 /**
  * Locates the specified tag by column and tag-slug and adds the "selected" class to it
  */
-cftd.selectTag = function(col, tag) {
+cftb.selectTag = function(col, tag) {
 	jQuery('.cftb_tags [rel="column_' + col + '"]').find('a[rel="tag-' + tag + '"]').addClass('selected');
 };
 
@@ -201,7 +199,7 @@ cftd.selectTag = function(col, tag) {
 /**
  * Sets the hash
  */
-cftd.setHash = function(tags, cat) {
+cftb.setHash = function(tags, cat) {
 	// Serialize our tags
 	tagStr = tags.join(',');
 	
@@ -216,7 +214,7 @@ cftd.setHash = function(tags, cat) {
 /**
  * Returns the hash value, without the hash character
  */
-cftd.getHash = function() {
+cftb.getHash = function() {
 	// substring it so we only get our tags, not the actual has mark
 	return window.location.hash.substr(1);
 };
@@ -224,8 +222,8 @@ cftd.getHash = function() {
 
 jQuery(function() {
 	// attach all our change and click events
-	cftd.handlers();
+	cftb.handlers();
 	
 	// only parse hash on page load
-	cftd.parseHash();
+	cftb.parseHash();
 });
