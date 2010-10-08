@@ -68,20 +68,11 @@ cftb.direct = function(this_col, next_col) {
 			// Attach our click/change handlers again
 			cftb.handlers();
 
-			// If we're doing our category filter and we don't have posts
-			if (cftb.doingCatFilter && !result.tag_count) {
-				// Set our category to All
-				jQuery('#cftb_category').val('');
-				
-				// Turn off our cat filter
-				cftb.doingCatFilter = false;
-			}
-			
 			// Set the hash value to our tags
 			cftb.setHash(selectedTags, jQuery('#cftb_category').val());
 			
 			// Check if have tags, or are doing the initial category filter
-			if (result.tag_count && (cftb.curTags || cftb.doingCatFilter)) {
+			if (cftb.curTags.length > 0) {
 				/* We don't want to shift anything off the array if we're
 				doing the category filter, we'll come back around and get 
 				the curTags. */
@@ -92,7 +83,8 @@ cftb.direct = function(this_col, next_col) {
 					cftb.curTags.shift();
 				}
 
-				// If we have more tags to do then call this function again.
+				/* Check again, since we may have been shifted off, and if we have 
+				more tags to do then call this function again. */
 				if (cftb.curTags.length > 0) {
 					// increment our vars
 					++this_col;
@@ -101,8 +93,11 @@ cftb.direct = function(this_col, next_col) {
 					// Mark the next tag as selected
 					cftb.selectTag(this_col, cftb.curTags[0]);
 					
-					// Make our call again
-					cftb.direct(this_col, next_col);
+					// If we couldn't select a tag, don't do anything
+					if (jQuery('.cftb_tags li a.selected').size()) {
+						// Make our call again
+						cftb.direct(this_col, next_col);
+					}
 				}
 			}
 		},
@@ -207,7 +202,7 @@ cftb.setHash = function(tags, cat) {
 	tagStr = tags.join(',');
 	
 	// Only toss on a cat if we have one
-	if (cat) {
+	if (cat && cat != null) {
 		cat = '|' + cat;
 	}
 	window.location.hash = tags + cat;
