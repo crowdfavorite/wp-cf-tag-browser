@@ -120,8 +120,8 @@ function cftb_tags_html($tags) {
 }
 
 function cftb_tag_html($tag) {
-	$count = empty($tag->count) ? '' : ' ('.$tag->count.')';
-	return '<li><a href="'.get_tag_link($tag->term_id).'" rel="tag-'.$tag->slug.'">'.esc_html($tag->name).$count.'</a></li>';
+	$html = '<li><a href="'.get_tag_link($tag->term_id).'" rel="tag-'.$tag->slug.'">'.esc_html($tag->name).'</a></li>';
+	return apply_filters('cftb_tag_html', $html, $tag);
 }
 
 function cftb_posts_html($posts) {
