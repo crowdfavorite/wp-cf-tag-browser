@@ -72,6 +72,9 @@ cftd.direct = function(this_col, next_col) {
 			if (cftd.doingCatFilter && !cftd.havePosts(result.posts)) {
 				// Set our category to All
 				jQuery('#cftb_category').val('');
+				
+				// Turn off our cat filter
+				cftd.doingCatFilter = false;
 			}
 			
 			// Set the hash value to our tags
