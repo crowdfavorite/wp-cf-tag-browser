@@ -3,8 +3,9 @@
 ## 1.1
 
 - Added ability for tag chain to be "bookmarkable"
-- Addition of tag counts next to the tags
-- Abstracted JavaScript into its own file.  Utilized the $wp_scripts->localize() method for dynamic info.  Commenting the JS up the wazoo
+- Addition of filter to the tag_html() function
+- Abstracted JavaScript into its own file.  Utilized the $wp_scripts->localize() method for dynamic info.
+- Lots of comments
 
 ## 1.0.3
 
