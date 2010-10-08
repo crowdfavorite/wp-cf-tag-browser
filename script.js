@@ -180,9 +180,12 @@ cftb.parseHash = function() {
 		else {
 			// Select our first tag
 			cftb.selectTag(1, cftb.curTags[0]);
-
-			// otherwise do the request
-			cftb.direct(1, 2);
+			
+			// If we couldn't select a tag, don't do anything
+			if (jQuery('.cftb_tags li a.selected').size()) {
+				// otherwise do the request
+				cftb.direct(1, 2);
+			}
 		}
 	}
 };
