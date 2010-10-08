@@ -2,7 +2,8 @@
  * Tag Browser Object
  */
 cftd = {};
-
+cftd.curTags = [];
+cftd.doingCatFilter = false;
 
 /**
  * Return the HTML for the loading div
@@ -17,10 +18,8 @@ cftd.tpl_loading = function() {
  *
  * @param int this_col The current column
  * @param int next_col The next column to build
- * @param array doTags (optional) Array of tags to loop over.  This is primarily 
- *                     implemented for the on-load parsing of the hash tags
  */
-cftd.direct = function(this_col, next_col, doTags) {
+cftd.direct = function(this_col, next_col) {
 
 	// Remove all columns after (and inclusive of) next_col
 	for (var i = next_col; i < 999; i++) {
@@ -69,28 +68,51 @@ cftd.direct = function(this_col, next_col, doTags) {
 			// Attach our click/change handlers again
 			cftd.handlers();
 			
-			// Set the hash value to our tags
-			cftd.setHash(selectedTags.join(','));
+			// If we're doing our category filter and we don't have posts
+			if (cftd.doingCatFilter && !cftd.havePosts(result.posts)) {
+				// Set our category to All
+				jQuery('#cftb_category').val('');
+			}
 			
-			// Check if we are an object (Arrays are objects too in JS)
-			if (doTags) {
-				// If we have more "do_tags" then call this function again.
-				doTags.shift();
-				if (doTags.length > 0) {
+			// Set the hash value to our tags
+			cftd.setHash(selectedTags, jQuery('#cftb_category').val());
+			
+			// Check if have tags, or are doing the initial category filter
+			if (cftd.havePosts(result.posts) && (cftd.curTags || cftd.doingCatFilter)) {
+				/* We don't want to shift anything off the array if we're
+				doing the category filter, we'll come back around and get 
+				the curTags. */
+				if (cftd.doingCatFilter) {
+					cftd.doingCatFilter = false;
+				}
+				else {
+					cftd.curTags.shift();
+				}
+
+				// If we have more tags to do then call this function again.
+				if (cftd.curTags.length > 0) {
 					// increment our vars
 					++this_col;
 					++next_col;
 					
 					// Mark the next tag as selected
-					cftd.selectTag(this_col, doTags[0]);
+					cftd.selectTag(this_col, cftd.curTags[0]);
 					
 					// Make our call again
-					cftd.direct(this_col, next_col, doTags);
+					cftd.direct(this_col, next_col);
 				}
 			}
 		},
 		'json'
 	);
+};
+
+
+/**
+ * Sees if we have posts in our AJAX response.
+ */
+cftd.havePosts = function(str) {
+	return str.indexOf(cftb.txtNoPosts) == '-1';
 };
 
 
@@ -117,6 +139,10 @@ cftd.handlers = function() {
 		// Figure out our next column
 		next_col = this_col + 1;
 		
+		// Set our tags
+		cftd.curTags = [];
+		cftd.curTags.push(jQuery(this).attr('rel').replace('tag-', ''));
+		
 		// Make our request
 		cftd.direct(this_col, next_col);
 		
@@ -135,13 +161,28 @@ cftd.parseHash = function() {
 	// Utilize our hash if it's provided
 	var hash = cftd.getHash();
 	if (hash.length > 0) {
-		var tags = hash.split(',');
+		// Split our hash into tags and cat ID
+		var pieces = hash.split('|');
+		
+		// Get our tags
+		cftd.curTags = pieces[0].length ? pieces[0].split(',') : [];
 		
 		// Select our first tag
-		cftd.selectTag(1, tags[0]);
+		cftd.selectTag(1, cftd.curTags[0]);
+
+		// Get our category, and set our select box to it.
+		var catID = pieces[1] || '';
 		
-		// do the request, passing our array of tags
-		cftd.direct(1, 2, tags);
+		// If we have a category that we're filtering on, we have to do that first
+		if (catID) {
+			jQuery('#cftb_category').val(catID);
+			cftd.doingCatFilter = true;
+			cftd.direct(0, 1);
+		}
+		else {
+			// otherwise do the request
+			cftd.direct(1, 2);
+		}
 	}
 };
 
@@ -157,8 +198,15 @@ cftd.selectTag = function(col, tag) {
 /**
  * Sets the hash
  */
-cftd.setHash = function(hashVal) {
-	window.location.hash = hashVal;
+cftd.setHash = function(tags, cat) {
+	// Serialize our tags
+	tagStr = tags.join(',');
+	
+	// Only toss on a cat if we have one
+	if (cat) {
+		cat = '|' + cat;
+	}
+	window.location.hash = tags + cat;
 };
 
 

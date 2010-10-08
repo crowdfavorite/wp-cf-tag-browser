@@ -146,6 +146,7 @@ if (!is_admin()) {
 	$wp_scripts->localize('cftb_js', 'cftb', array(
 		'endpoint' => trailingslashit(get_bloginfo('url')),
 		'txtLoading' => __('Loading...', 'cf_tag_browser'),
+		'txtNoPosts' => __('No posts found.', 'cf_tag_browser'),
 	));
 	
 	wp_enqueue_style('cftb_css',trailingslashit(get_bloginfo('url')).'?cf_action=cftb_css');
