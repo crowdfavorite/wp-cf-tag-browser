@@ -342,12 +342,6 @@ if (cftb_setting('cftb_create_page') == 'yes') {
 	}
 	add_action('generate_rewrite_rules','cftb_generate_rewrite_rules');
 
-	function cf_flushRewriteRules() {
-		global $wp_rewrite;
-		$wp_rewrite->flush_rules();
-	}
-	add_action('init', 'cf_flushRewriteRules');
-
 	function cftb_query_vars($vars) {
 		array_push($vars, 'cf_action');
 		return $vars;
@@ -366,6 +360,7 @@ if (cftb_setting('cftb_create_page') == 'yes') {
 			$wp_query->post_type = 'page';
 			$wp_query->post_count = 1;
 			$wp_query->current_post = -1;
+			$wp_query->is_page = 1;
 			add_filter('the_title', 'cftb_the_title');
 			add_filter('wp_title', 'cftb_wp_title', 10, 3);
 			add_filter('the_content', 'cftb_the_content');
@@ -373,7 +368,6 @@ if (cftb_setting('cftb_create_page') == 'yes') {
 			include($template);
 			die();
 		}
-		error_log('getting here');
 	}
 	add_action('template_redirect', 'cftb_template_redirect');
 
@@ -550,6 +544,9 @@ function cftb_save_settings() {
 		}
 		update_option($key, $value);
 	}
+	// Flush the rewrites here, not at init
+	global $wp_rewrite;
+	$wp_rewrite->flush_rules();
 }
 
 
