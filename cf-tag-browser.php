@@ -14,24 +14,34 @@ function cftb_browser() {
 	echo cftb_get_browser();
 }
 
+function cftb_category_section_html() {
+	$categories = get_categories('hide_empty=0');
+	
+	// Put together our options
+	$cat_options = '<option value="" selected="selected">'.__('All', 'cf_tag_browser').'</option>'.PHP_EOL;
+	foreach ($categories as $category) {
+		$cat_options .= '<option value="'.$category->term_id.'">'.esc_html($category->name).'</option>'.PHP_EOL;
+	}
+	
+	$html = '
+	<div class="cftb_cat">
+		<label for="cftb_category">'.__('Limit to Category:', 'cf_tag_browser').'</label>
+		<select id="cftb_category" name="cftb_category">
+		'.$cat_options.'
+		</select>
+	</div>
+	';
+	return apply_filters('cftb_category_section', $html, $categories);
+}
+
 function cftb_get_browser() {
 	$tags = get_tags();
 	if (!count($tags)) {
 		return '<div class="cftb_empty">'.__('No tags - add some!', 'cf_tag_browser').'</div>';
 	}
-	$categories = get_categories('hide_empty=0');
-	$cat_options = '<option value="" selected="selected">'.__('All', 'cf_tag_browser').'</option>'.PHP_EOL;
-	foreach ($categories as $category) {
-		$cat_options .= '<option value="'.$category->term_id.'">'.htmlspecialchars($category->name).'</option>'.PHP_EOL;
-	}
 	return '
 <h3>'.__('Tags', 'cf_tag_browser').'</h3>
-<div class="cftb_cat">
-	<label for="cftb_category">'.__('Limit to Category:', 'cf_tag_browser').'</label>
-	<select id="cftb_category" name="cftb_category">
-	'.$cat_options.'
-	</select>
-</div>
+'.cftb_category_section_html().'
 <div class="cftb_tags">
 	<div class="column" rel="column_1">
 	'.cftb_tags_html($tags).'
@@ -227,7 +237,9 @@ function cftb_request_handler() {
 }
 .cftb_cat {
 	background: #eee;
-	border: 1px solid #ccc;
+	border-right: 1px solid #ccc;
+	border-top: 1px solid #ccc;
+	border-left: 1px solid #ccc;
 	border-width: 1px;
 	padding: 5px 12px;
 	text-align: right;
@@ -236,9 +248,7 @@ function cftb_request_handler() {
 	height: <?php echo $tags_height; ?>px;
 	overflow: auto;
 	position: relative;
-	border-right: 1px solid #ccc;
-	border-bottom: 1px solid #ccc;
-	border-left: 1px solid #ccc;
+	border: 1px solid #ccc;
 	margin-bottom: 1em;
 }
 .cftb_tags .column {
