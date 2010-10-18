@@ -4,6 +4,7 @@
 
 - Added ability for tag chain to be "bookmarkable"
 - Addition of filter to the tag_html() function
+- Addition of filter for the category dropdown section.
 - Abstracted JavaScript into its own file.  Utilized the $wp_scripts->localize() method for dynamic info.
 - Lots of comments
 
