@@ -201,11 +201,10 @@ cftb.setHash = function(tags, cat) {
 	// Serialize our tags
 	tagStr = tags.join(',');
 	
-	// Only toss on a cat if we have one
-	if (cat && cat != null) {
-		cat = '|' + cat;
-	}
-	window.location.hash = tags + cat;
+	// Set the cat to empty if we don't have one.
+	cat = (cat) ? '|' + cat : '';
+
+	window.location.hash = tagStr + cat;
 };
 
 
